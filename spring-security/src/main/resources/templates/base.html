@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${pageTitle}">My App</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<!-- Header (reusable) -->
+<header>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/users">Users</a>
+        <a href="/logout">Logout</a>
+    </nav>
+</header>
+
+<!-- Main content area (filled by child templates) -->
+<main th:fragment="content">
+    <!-- Child templates replace this -->
+</main>
+
+<!-- Footer (reusable) -->
+<footer>
+    <p>&copy; 2024 My App. All rights reserved.</p>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

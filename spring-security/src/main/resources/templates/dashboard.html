@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard</title>
+    <style>
+        .admin-panel { background: #f0f0f0; padding: 10px; }
+        .post { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+<!-- Show admin panel only to admins -->
+<div th:if="${user.role == 'ADMIN'}" class="admin-panel">
+    <h3>Admin Controls</h3>
+    <a href="/admin/users">Manage Users</a>
+    <a href="/admin/posts">Manage Posts</a>
+</div>
+
+<!-- Welcome message -->
+<h1>Welcome, <span th:text="${user.fullName}"></span>!</h1>
+<p>Email: <span th:text="${user.email}"></span></p>
+
+<!-- Post count -->
+<p>
+    <span th:text="${postCount}"></span>
+    <span th:text="${postCount == 1} ? 'post' : 'posts'"></span>
+</p>
+
+<!-- List user's posts -->
+<div th:if="${posts.size() > 0}">
+    <h2>Your Posts</h2>
+    <div th:each="post : ${posts}" class="post">
+        <h3 th:text="${post.title}"></h3>
+        <p th:text="${post.content}"></p>
+        <small th:text="${post.createdAt}"></small>
+        <a th:href="@{/post/{id}/edit(id=${post.id})}">Edit</a>
+        <a th:href="@{/post/{id}/delete(id=${post.id})}">Delete</a>
+    </div>
+</div>
+
+<!-- Empty state -->
+<div th:if="${posts.size() == 0}">
+    <p>No posts yet. <a href="/post/new">Create your first post!</a></p>
+</div>
+
+<a href="/logout">Logout</a>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+        }
+
+        .register-container {
+            width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="register-container">
+
+    <h2>Register User</h2>
+
+    <input type="text" id="name" placeholder="Enter Name">
+    <input type="email" id="email" placeholder="Enter Email">
+    <input type="password" id="password" placeholder="Enter Password">
+    <button onclick="register()">Register</button>
+    <div style="margin-top:15px; text-align:center;">
+        <a th:href="@{/page/home}">
+            Back To Login
+        </a>
+    </div>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    async function register() {
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email,
+                password: password
+            })
+        });
+
+        const result = await response.json();
+        const messageDiv = document.getElementById("message");
+
+        if(response.ok) {
+            messageDiv.innerHTML =
+                "<p class='success'>Registration Successful</p>";
+        } else {
+            messageDiv.innerHTML =
+                "<p class='error'>" + result.message + "</p>";
+        }
+    }
+</script>
+</body>
+</html>

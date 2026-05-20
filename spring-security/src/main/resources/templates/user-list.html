@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>All Users</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background: #f0f0f0; }
+    </style>
+</head>
+<body>
+<h1>Users Directory</h1>
+
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Username</th>
+        <th>Full Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Posts</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Loop with index -->
+    <tr th:each="user, stat : ${users}">
+        <td th:text="${stat.count}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.fullName}"></td>
+        <td th:text="${user.email}"></td>
+
+        <!-- Role badge with color -->
+        <td>
+                    <span th:if="${user.role == 'ADMIN'}" style="background: red; color: white; padding: 2px 8px;">
+                        Admin
+                    </span>
+            <span th:unless="${user.role == 'ADMIN'}" style="background: blue; color: white; padding: 2px 8px;">
+                        User
+                    </span>
+        </td>
+
+        <td th:text="${user.posts.size()}"></td>
+        <td>
+            <a th:href="@{/user/{id}(id=${user.id})}">View</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

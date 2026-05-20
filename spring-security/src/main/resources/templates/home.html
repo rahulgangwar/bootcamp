@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f4f4f4;
+        }
+
+        .login-container {
+            width: 350px;
+            margin: 100px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 15px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .success {
+            color: green;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1 th:text="${message}"></h1>
+<p>Hello, Current date is : <span th:text="${date}"></span></p>
+
+<div class="login-container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Enter email">
+    <input type="password" id="password" placeholder="Enter password">
+    <button onclick="login()">Login</button>
+    <div style="margin-top:15px; text-align:center;">
+        <a th:href="@{/page/register}">
+            New User? Register Here
+        </a>
+    </div>
+    <div id="message"></div>
+</div>
+
+<script>
+    async function login() {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const response = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                email: email,
+                password: password
+            })
+        });
+
+        const result = await response.json();
+        const messageDiv = document.getElementById("message");
+        if (response.ok) {
+            localStorage.setItem("token", result.accessToken);
+            messageDiv.innerHTML =
+                "<p class='success'>Login Successful</p>";
+            console.log(result);
+        } else {
+            messageDiv.innerHTML =
+                "<p class='error'>" + result.message + "</p>";
+        }
+    }
+</script>
+</body>
+</html>
