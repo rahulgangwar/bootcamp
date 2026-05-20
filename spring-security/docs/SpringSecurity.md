@@ -1,13 +1,13 @@
 # Complete Spring Security Login Flow: From API Call to Database
 
+![complete_login_flow.svg](complete_login_flow.svg)
+---
 ## Overview
 1. User submits login credentials via HTTP POST
 2. Request flows through servlet filters
 3. Credentials extracted and validated against database
 4. Session created and user authenticated
 5. Authenticated user can access secured resources
-
----
 
 ## 1. User Submits Login Form
 
