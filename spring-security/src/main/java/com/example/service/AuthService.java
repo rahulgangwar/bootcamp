@@ -54,7 +54,8 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .enabled(false) // User needs to verify email
+                // User is enabled by default, set it to false if need to implement verify email feature
+                .enabled(true)
                 .build();
 
         User savedUser = userRepository.save(user);
