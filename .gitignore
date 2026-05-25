@@ -2,3 +2,4 @@
 .slingshot
 .DS_Store
 *.iml
+.env
