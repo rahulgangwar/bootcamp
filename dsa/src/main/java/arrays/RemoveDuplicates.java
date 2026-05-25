@@ -3,27 +3,18 @@ package arrays;
 import java.util.Arrays;
 
 public class RemoveDuplicates {
-  public static void main(String[] args) {
-    System.out.println(Arrays.toString(removeDuplicates(new int[] {10, 10, 20, 20, 30, 30})));
-  }
+    public static void main(String[] args) {
+        int[] data = {1, 2, 2, 3, 4, 4, 5, 6, 6, 7};
+        int i = 1;
+        int j = 1;
 
-  private static int[] removeDuplicates(int[] data) {
-    int index = 0;
-    int pointer = 0;
-
-    while (index < data.length - 1 || pointer < data.length - 1) {
-      if (index < data.length - 1) {
-        if (data[pointer] != data[index]) {
-          pointer++;
-          data[pointer] = data[index];
+        while (j < data.length) {
+            if(data[j] != data[j-1]) {
+                data[i] = data[j];
+                i++;
+            }
+            j++;
         }
-        index++;
-      } else {
-        pointer++;
-        data[pointer] = -1;
-      }
+        System.out.println(Arrays.toString(data));
     }
-
-    return data;
-  }
 }
