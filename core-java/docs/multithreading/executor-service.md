@@ -1,18 +1,38 @@
 # Executor Service
 
 ## Table of Contents
-1. [Basic Concepts](#basic-concepts)
-2. [Thread Pools](#thread-pools)
-3. [Practical Usage](#practical-usage)
-4. [Exception Handling](#exception-handling)
-5. [Advanced Scenarios](#advanced-scenarios)
-6. [Common Pitfalls](#common-pitfalls)
+
+### 1. [Basic Concepts](#basic-concepts)
+   - Q1: Tell me about ExecutorService and why you would use it instead of creating threads manually?
+   - Q2: What's the difference between execute() and submit() methods? When would you use each one?
+
+### 2. [Thread Pools](#thread-pools)
+   - Q3: Can you describe the different types of thread pools available and explain when you would use each one?
+   - Q4: What happens when you submit tasks to a thread pool that's already at capacity?
+
+### 3. [Practical Usage](#practical-usage)
+   - Q5: How should you properly shutdown an ExecutorService in production code?
+   - Q6: How would you retrieve results from tasks executed by an ExecutorService? Can you show me an example?
+   - Q7: Can you describe a real-world scenario where you would use invokeAny() and walk me through the implementation?
+
+### 4. [Exception Handling](#exception-handling)
+   - Q8: How do you handle exceptions in ExecutorService? What's the difference between execute() and submit() in terms of exception handling?
+
+### 5. [Advanced Scenarios](#advanced-scenarios)
+   - Q9: Can you implement a worker pool pattern using ExecutorService? Walk me through your approach.
+   - Q10: How would you use ExecutorService with CompletableFuture for complex async operations? Show me an example.
+   - Q13: What criteria should you consider when choosing the right thread pool size for your application?
+   - Q14: What happens if a thread in the thread pool dies or encounters an uncaught exception? How would you handle this in production?
+
+### 6. [Common Pitfalls](#common-pitfalls)
+   - Q11: What are some common mistakes developers make when working with ExecutorService?
+   - Q12: What's the difference between FixedThreadPool and ForkJoinPool? When would you choose one over the other?
 
 ---
 
 ## Basic Concepts
 
-### Q1: What is an Executor Service and why would you use it instead of creating threads manually?
+### Q1: Tell me about ExecutorService and why you would use it instead of creating threads manually?
 
 **Answer:**
 
@@ -49,7 +69,7 @@ executor.shutdown();
 
 ---
 
-### Q2: What's the difference between `execute()` and `submit()` methods?
+### Q2: What's the difference between `execute()` and `submit()` methods? When would you use each one?
 
 **Answer:**
 
@@ -89,7 +109,7 @@ try {
 
 ## Thread Pools
 
-### Q3: What are the different types of thread pools and when would you use each?
+### Q3: Can you describe the different types of thread pools available and explain when you would use each one?
 
 **Answer:**
 
@@ -144,7 +164,7 @@ ExecutorService executor = Executors.newFixedThreadPool(
 
 ---
 
-### Q4: What happens when you submit tasks to a full thread pool?
+### Q4: What happens when you submit tasks to a thread pool that's already at capacity?
 
 **Answer:**
 
@@ -214,7 +234,7 @@ for (int i = 0; i < 10_000; i++) {
 
 ## Practical Usage
 
-### Q5: How do you properly shutdown an ExecutorService?
+### Q5: How should you properly shutdown an ExecutorService in production code?
 
 **Answer:**
 
@@ -269,7 +289,7 @@ try {
 
 ---
 
-### Q6: How do you retrieve results from ExecutorService tasks using Future?
+### Q6: How would you retrieve results from tasks executed by an ExecutorService? Can you show me an example?
 
 **Answer:**
 
@@ -358,7 +378,7 @@ executor.shutdown();
 
 ---
 
-### Q7: Demonstrate a practical scenario using ExecutorService with invokeAny()
+### Q7: Can you describe a real-world scenario where you would use invokeAny() and walk me through the implementation?
 
 **Answer:**
 
@@ -428,7 +448,7 @@ try {
 
 ## Exception Handling
 
-### Q8: How do you properly handle exceptions in ExecutorService?
+### Q8: How do you handle exceptions in ExecutorService? What's the difference between execute() and submit() in terms of exception handling?
 
 **Answer:**
 
@@ -510,7 +530,7 @@ ThreadPoolExecutor executor = new ThreadPoolExecutor(
 
 ## Advanced Scenarios
 
-### Q9: How would you implement a worker pool pattern with ExecutorService?
+### Q9: Can you implement a worker pool pattern using ExecutorService? Walk me through your approach.
 
 **Answer:**
 
@@ -581,7 +601,7 @@ pool.shutdown();
 
 ---
 
-### Q10: How do you use ExecutorService with CompletableFuture for complex async operations?
+### Q10: How would you use ExecutorService with CompletableFuture for complex async operations? Show me an example.
 
 **Answer:**
 
@@ -632,9 +652,462 @@ executor.shutdown();
 
 ---
 
+### Q13: What criteria should you consider when choosing the right thread pool size for your application?
+
+**Answer:**
+
+Choosing the right thread pool size is **critical** for system performance. Too small and you waste resources; too large and you run out of memory or cause context-switching overhead.
+
+**Formula for Different Workload Types:**
+
+```java
+// For I/O-bound tasks (network calls, database, file I/O)
+// Formula: Number of cores × (1 + Wait time / Compute time)
+int ioThreads = Runtime.getRuntime().availableProcessors() * (1 + 2); // = cores × 3-4
+ExecutorService ioExecutor = Executors.newFixedThreadPool(ioThreads);
+
+// For CPU-bound tasks (calculations, processing)
+// Formula: Approximately equal to number of CPU cores
+int cpuThreads = Runtime.getRuntime().availableProcessors();
+ExecutorService cpuExecutor = Executors.newFixedThreadPool(cpuThreads);
+
+// Practical example
+int cpuCores = Runtime.getRuntime().availableProcessors();
+System.out.println("CPU Cores: " + cpuCores);
+// On a 8-core machine:
+// - CPU-bound pool: 8 threads
+// - I/O-bound pool: 24-32 threads
+```
+
+**Detailed Criteria Analysis:**
+
+```java
+public class ThreadPoolSizeCalculator {
+    
+    /**
+     * Calculating optimal pool size with detailed metrics
+     */
+    public static int calculateOptimalPoolSize() {
+        int cpuCores = Runtime.getRuntime().availableProcessors();
+        long totalMemory = Runtime.getRuntime().totalMemory();
+        
+        // Each thread uses approximately 1 MB of stack memory
+        long memoryPerThread = 1_000_000; // 1 MB
+        int maxThreadsByMemory = (int) (totalMemory / memoryPerThread);
+        
+        // Example: On an 8-core system with 8GB RAM
+        // - Memory allows: ~8000 threads
+        // - But we want to be conservative
+        
+        // For web servers (I/O-bound)
+        int webServerSize = cpuCores * 3; // Typical: 24 threads for 8 cores
+        
+        // For background batch processing (I/O-bound)
+        int batchSize = cpuCores * 2;
+        
+        // For computational tasks (CPU-bound)
+        int computeSize = cpuCores; // 8 threads for 8 cores
+        
+        return Math.min(webServerSize, maxThreadsByMemory);
+    }
+    
+    /**
+     * Real-world decision matrix
+     */
+    public static ExecutorService selectPoolSize(WorkloadType type, 
+                                                  int expectedConcurrentUsers) {
+        int cpuCores = Runtime.getRuntime().availableProcessors();
+        int poolSize;
+        
+        switch (type) {
+            case WEB_SERVER:
+                // Requests spend 80% time waiting for I/O
+                poolSize = cpuCores * 4;
+                break;
+                
+            case DATABASE_CONNECTIONS:
+                // Database has limited connections (e.g., 20 max)
+                poolSize = 20;
+                break;
+                
+            case BATCH_PROCESSING:
+                // Process files, do calculations
+                poolSize = cpuCores * 2;
+                break;
+                
+            case CPU_INTENSIVE:
+                // Heavy calculations (video encoding, compression)
+                poolSize = cpuCores;
+                break;
+                
+            case MIXED_IO_CPU:
+                // 50% I/O, 50% CPU
+                poolSize = (int) (cpuCores * 1.5);
+                break;
+                
+            default:
+                poolSize = cpuCores * 2;
+        }
+        
+        return Executors.newFixedThreadPool(poolSize);
+    }
+}
+
+enum WorkloadType {
+    WEB_SERVER, DATABASE_CONNECTIONS, BATCH_PROCESSING, CPU_INTENSIVE, MIXED_IO_CPU
+}
+```
+
+**Production Example - Configurable Pool Sizing:**
+
+```java
+public class ConfigurableExecutorService {
+    private static final Logger logger = LoggerFactory.getLogger(ConfigurableExecutorService.class);
+    
+    public static ExecutorService createOptimizedExecutor(String applicationName) {
+        int cpuCores = Runtime.getRuntime().availableProcessors();
+        
+        // Read from configuration file or environment
+        int coreThreads = Integer.parseInt(
+            System.getenv().getOrDefault(
+                "EXECUTOR_CORE_THREADS",
+                String.valueOf(cpuCores)
+            )
+        );
+        
+        int maxThreads = Integer.parseInt(
+            System.getenv().getOrDefault(
+                "EXECUTOR_MAX_THREADS",
+                String.valueOf(cpuCores * 2)
+            )
+        );
+        
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1000);
+        
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            coreThreads,
+            maxThreads,
+            60,
+            TimeUnit.SECONDS,
+            queue,
+            new ThreadFactoryBuilder()
+                .setNameFormat(applicationName + "-thread-%d")
+                .setDaemon(false)
+                .build(),
+            new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+        
+        // Log the configuration
+        logger.info("Created executor for {}: coreThreads={}, maxThreads={}, queueCapacity={}",
+                    applicationName, coreThreads, maxThreads, queue.remainingCapacity());
+        
+        return executor;
+    }
+}
+```
+
+**Key Decision Factors:**
+
+| Factor | I/O-Bound | CPU-Bound |
+|--------|-----------|-----------|
+| **Waiting Time** | High (network, DB, file I/O) | Low (CPU processing) |
+| **Pool Size** | cores × 2-4 | cores × 1-2 |
+| **Rationale** | More threads hide I/O latency | More threads = context-switch overhead |
+| **Example** | Web server: 8 cores → 24 threads | Image processor: 8 cores → 8 threads |
+| **Queue Size** | Bounded (prevent memory issues) | Can be larger (less variation) |
+
+**Interview Insight:** Show that you understand this is not one-size-fits-all and depends on profiling and monitoring real-world workloads.
+
+---
+
+### Q14: What happens if a thread in the thread pool dies or encounters an uncaught exception? How would you handle this in production?
+
+**Answer:**
+
+This is a **critical** production issue. When a thread dies unexpectedly, the thread pool must handle it properly.
+
+**Scenario 1: Thread Dies Due to Uncaught Exception:**
+
+```java
+ExecutorService executor = Executors.newFixedThreadPool(3);
+
+// Submit task that throws exception
+executor.execute(() -> {
+    System.out.println("Task started");
+    int x = 10 / 0; // ArithmeticException
+    System.out.println("Task completed"); // Never reaches here
+});
+
+// ❌ PROBLEM: The thread dies silently!
+// Thread pool doesn't automatically replace it with a new thread
+// For FixedThreadPool, you now have only 2 threads instead of 3
+
+executor.shutdown();
+```
+
+**What Actually Happens - Step by Step:**
+
+```java
+public class ThreadDeathScenario {
+    public static void main(String[] args) throws InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        
+        // Submit 5 tasks to a 3-thread pool
+        for (int i = 1; i <= 5; i++) {
+            final int taskId = i;
+            executor.execute(() -> {
+                System.out.println("Task " + taskId + " started by " + 
+                                   Thread.currentThread().getName());
+                
+                if (taskId == 2) {
+                    // Task 2 throws exception and thread dies
+                    throw new RuntimeException("Task " + taskId + " failed!");
+                }
+                
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                
+                System.out.println("Task " + taskId + " completed");
+            });
+        }
+        
+        Thread.sleep(5000);
+        
+        // Output:
+        // Task 1 started by pool-1-thread-1
+        // Task 2 started by pool-1-thread-2
+        // Task 5 started by pool-1-thread-3   // Task 3,4 queued
+        // Task 2 FAILED! (uncaught exception, thread-2 dies)
+        // Task 1 completed
+        // Task 3 started by pool-1-thread-1   // Reused thread-1
+        // Task 5 completed
+        // Task 4 started by pool-1-thread-3   // Thread-2 is DEAD!
+        // Task 4 completed
+        
+        // ⚠️ PROBLEM: Thread-2 is dead, only 2 threads processing now!
+    }
+}
+```
+
+**How Different Executors Handle Thread Death:**
+
+```java
+// 1. FixedThreadPool - Does NOT replace dead threads automatically
+ExecutorService fixed = Executors.newFixedThreadPool(5);
+// If a thread dies, you have only 4 threads now
+// This is a MEMORY LEAK and PERFORMANCE DEGRADATION
+
+
+// 2. SingleThreadExecutor - DOES replace dead thread
+ExecutorService single = Executors.newSingleThreadExecutor();
+// If the single thread dies, a new one is created automatically
+// Tasks are ALWAYS processed sequentially
+
+
+// 3. CachedThreadPool - DOES replace dead threads
+ExecutorService cached = Executors.newCachedThreadPool();
+// Creates new threads as needed when old ones die
+
+
+// 4. ScheduledExecutorService - DOES replace dead threads
+ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(5);
+// Scheduled tasks might not run if thread dies
+```
+
+**Correct Approach - Monitor and Handle Thread Death:**
+
+```java
+public class RobustExecutorService {
+    
+    /**
+     * Create executor that logs thread death and has proper exception handling
+     */
+    public static ExecutorService createRobustExecutor(int poolSize, String name) {
+        
+        ThreadFactory threadFactory = new ThreadFactory() {
+            private final AtomicInteger threadId = new AtomicInteger(0);
+            
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(() -> {
+                    try {
+                        r.run();
+                    } catch (Exception e) {
+                        System.err.println("Thread " + 
+                            Thread.currentThread().getName() + 
+                            " died with exception: " + e.getMessage());
+                        e.printStackTrace();
+                        // Thread is now dead!
+                    }
+                });
+                
+                thread.setName(name + "-" + threadId.incrementAndGet());
+                thread.setUncaughtExceptionHandler((t, ex) -> {
+                    System.err.println("Uncaught exception in thread " + t.getName());
+                    ex.printStackTrace();
+                });
+                
+                return thread;
+            }
+        };
+        
+        BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(1000);
+        
+        return new ThreadPoolExecutor(
+            poolSize,
+            poolSize,
+            60,
+            TimeUnit.SECONDS,
+            queue,
+            threadFactory,
+            new ThreadPoolExecutor.CallerRunsPolicy() {
+                @Override
+                public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+                    System.err.println("Task rejected! Queue size: " + queue.size());
+                    super.rejectedExecution(r, executor);
+                }
+            }
+        );
+    }
+}
+```
+
+**Solution 1: Use Wrapper Tasks with Exception Handling:**
+
+```java
+ExecutorService executor = Executors.newFixedThreadPool(5);
+
+// Wrap each task with exception handler
+Runnable safeTask = wrapTaskWithExceptionHandling(() -> {
+    // Your actual task
+    int x = 10 / 0; // Exception is caught and logged
+});
+
+executor.execute(safeTask);
+
+private static Runnable wrapTaskWithExceptionHandling(Runnable task) {
+    return () -> {
+        try {
+            task.run();
+        } catch (Throwable e) {
+            System.err.println("Task failed: " + e.getMessage());
+            logger.error("Task execution failed", e);
+            // Don't rethrow - thread will continue living
+        }
+    };
+}
+```
+
+**Solution 2: Use SingleThreadExecutor for Critical Tasks:**
+
+```java
+// For tasks where thread death is unacceptable
+ExecutorService executor = Executors.newSingleThreadExecutor();
+// SingleThreadExecutor automatically creates a new thread if one dies
+
+executor.submit(() -> {
+    System.out.println("Critical task");
+    int x = 10 / 0; // Thread dies but a NEW one is created automatically
+});
+
+// Next submitted task will run on the new thread
+executor.submit(() -> {
+    System.out.println("This will still run!");
+});
+```
+
+**Solution 3: Monitor Thread Death with JMX/Metrics:**
+
+```java
+public class ExecutorServiceMonitor {
+    private final ThreadPoolExecutor executor;
+    private final AtomicInteger threadDeathCount = new AtomicInteger(0);
+    private final AtomicInteger taskFailureCount = new AtomicInteger(0);
+    
+    public void monitorExecutor() {
+        Timer timer = new Timer(true);
+        timer.scheduleAtFixedRate(() -> {
+            int activeThreads = executor.getActiveCount();
+            int queueSize = executor.getQueue().size();
+            int completedTasks = (int) executor.getCompletedTaskCount();
+            int totalTasks = executor.getTaskCount();
+            
+            System.out.println("=== Executor Stats ===");
+            System.out.println("Active threads: " + activeThreads);
+            System.out.println("Queue size: " + queueSize);
+            System.out.println("Completed tasks: " + completedTasks);
+            System.out.println("Total tasks: " + totalTasks);
+            System.out.println("Thread deaths: " + threadDeathCount.get());
+            System.out.println("Task failures: " + taskFailureCount.get());
+            
+            // Alert if too many deaths
+            if (threadDeathCount.get() > executor.getCorePoolSize() / 2) {
+                System.err.println("⚠️ ALERT: Too many thread deaths!");
+            }
+        }, 0, 5000);
+    }
+}
+```
+
+**Real Production Pattern:**
+
+```java
+public class ProductionExecutorService {
+    private static final Logger logger = LoggerFactory.getLogger(ProductionExecutorService.class);
+    
+    public static ThreadPoolExecutor createProductionExecutor() {
+        ThreadFactory factory = new ThreadFactoryBuilder()
+            .setNameFormat("worker-%d")
+            .setDaemon(false)
+            .setUncaughtExceptionHandler((thread, ex) -> {
+                logger.error("Thread {} died with exception", thread.getName(), ex);
+                metrics.incrementThreadDeathCount();
+                alerting.sendCriticalAlert("Thread death", ex);
+            })
+            .build();
+        
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(
+            10, 20, 60, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(5000),
+            factory,
+            new ThreadPoolExecutor.AbortPolicy() // Don't silently discard
+        );
+        
+        // Monitor periodically
+        ScheduledExecutorService monitor = Executors.newScheduledThreadPool(1);
+        monitor.scheduleAtFixedRate(() -> {
+            int poolSize = executor.getPoolSize();
+            int coreSize = executor.getCorePoolSize();
+            
+            if (poolSize < coreSize) {
+                logger.warn("WARNING: Only {} threads active out of {} core threads. " +
+                           "Some threads may have died", poolSize, coreSize);
+            }
+        }, 0, 10, TimeUnit.SECONDS);
+        
+        return executor;
+    }
+}
+```
+
+**Key Takeaways:**
+
+1. **Thread death is silent** - Use UncaughtExceptionHandler to detect it
+2. **FixedThreadPool doesn't replace dead threads** - Only SingleThreadExecutor does
+3. **Always wrap critical tasks** with try-catch to prevent thread death
+4. **Monitor actively** - Track thread counts and queue sizes
+5. **Set up alerts** - Notify admins when threads die unexpectedly
+
+**Interview Insight:** This shows deep understanding of thread pool internals and production readiness. Most developers don't know about thread death scenarios!
+
+---
+
 ## Common Pitfalls
 
-### Q11: What are common mistakes developers make with ExecutorService?
+### Q11: What are some common mistakes developers make when working with ExecutorService?
 
 **Answer:**
 
