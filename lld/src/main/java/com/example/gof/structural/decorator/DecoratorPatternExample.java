@@ -5,6 +5,12 @@ import com.example.gof.structural.decorator.impl.EmailNotifier;
 import com.example.gof.structural.decorator.impl.PushNotifier;
 import com.example.gof.structural.decorator.impl.SMSNotifier;
 
+/**
+ * The Decorator Pattern is a structural design pattern that dynamically adds responsibilities or behavior to an object
+ * by wrapping it inside decorator objects. It follows the Open/Closed Principle because new functionality can be added
+ * without modifying existing classes. A classic Java example is the InputStream hierarchy, where BufferedInputStream
+ * and DataInputStream decorate FileInputStream to add buffering and data-reading capabilities
+ */
 public class DecoratorPatternExample {
     public static void main(String[] args) {
         String message = "Your order has been shipped!";

@@ -1,79 +1,77 @@
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 class Solution {
 
-    public static void main(String[] args) {
-        Solution s = new Solution();
-        int[] forbidden = {8,3,16,6,12,20};
-        int frwd = 15;
-        int bkwd = 13;
-        int target = 11;
-        System.out.println(s.minimumJumps(forbidden, frwd, bkwd, target));
-    }
+    class LRUCache {
+        Map<Integer, Node> cache = new HashMap<>();
+        Node head; // most recently used
+        Node tail; // least recently used
+        int capacity;
 
-    class Pair {
-        int pos;
-        boolean isLastBkwd;
+        class Node {
+            int data;
+            Node left;
+            Node right;
 
-        public Pair(int pos, boolean isLastBkwd) {
-            this.pos = pos;
-            this.isLastBkwd = isLastBkwd;
-        }
-
-        public boolean equals(Pair p) {
-            return this.pos == p.pos && this.isLastBkwd == p.isLastBkwd;
-        }
-
-        @Override
-        public String toString() {
-            return "Pair{" +
-                    "pos=" + pos +
-                    ", isLastBkwd=" + isLastBkwd +
-                    '}';
-        }
-    }
-
-    public int minimumJumps(int[] forbidden, int frwd, int bkwd, int target) {
-        Queue<Pair> q = new LinkedList<>();
-        Set<Pair> seen = new HashSet<>();
-        int ans = 0;
-        int nextPos = 0;
-
-        Set<Integer> forbiddenSet = new HashSet<>();
-        for (int i : forbidden) {
-            forbiddenSet.add(i);
-        }
-
-        Pair p = new Pair(0, false);
-        q.offer(p);
-        seen.add(p);
-
-        while (!q.isEmpty()) {
-            int size = q.size();
-            for (int i = 0; i < size; i++) {
-                p = q.poll();
-                System.out.println(p.pos);
-                if (p.pos == target) return ans;
-
-                // jump forward
-                nextPos = p.pos + frwd;
-                if (!forbiddenSet.contains(nextPos) && nextPos < 2000 + Math.max(frwd, bkwd) && !seen.contains(new Pair(nextPos, false))) {
-                    q.offer(new Pair(nextPos, false));
-                    seen.add(new Pair(nextPos, false));
-                }
-
-                // jump backward
-                nextPos = p.pos - bkwd;
-                if (!forbiddenSet.contains(nextPos) && nextPos >= 0 && !seen.contains(new Pair(nextPos, true))) {
-                    q.offer(new Pair(nextPos, true));
-                    seen.add(new Pair(nextPos, true));
-                }
+            public Node(int data) {
+                this.data = data;
             }
-            ans++;
+
+            public void setData(int data) {
+                this.data = data;
+            }
         }
-        return -1;
+
+
+        public LRUCache(int capacity) {
+            this.capacity = capacity;
+        }
+
+        public int get(int key) {
+            if (cache.containsKey(key)) return -1;
+
+            Node value = cache.get(key);
+
+            // remove from the list
+            Node prev = value.left;
+            Node next = value.right;
+            prev.right = next;
+            next.left = prev;
+
+            // insert at head as it is now the MRU
+            next = head.right;
+            value.right = next;
+            value.left = null;
+            head = value;
+            return value.data;
+        }
+
+        public void put(int key, int value) {
+            if (cache.containsKey(key)) {
+                cache.get(key).setData(value);
+            } else {
+                Node curr = new Node(value);
+                if (cache.size() == capacity) {
+                    //remove tail (LRU)
+                    Node prev = tail.left;
+                    tail = prev;
+                    tail.right = null;
+
+                    //insert at head (MRU)
+                    Node next = head.right;
+                    curr.right = next;
+                    head = curr;
+                }
+                cache.put(key, curr);
+            }
+        }
     }
+
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
 }

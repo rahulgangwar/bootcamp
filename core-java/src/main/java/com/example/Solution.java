@@ -8,10 +8,14 @@ import java.util.concurrent.TimeUnit;
 
 public class Solution {
     public static void main(String[] args) throws Exception {
+        Thread t = new Thread(() -> {
+            System.out.println("Running");
+        });
 
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(3);
+        t.start();
+        t.start();   // Exception
 
-        executor.scheduleAtFixedRate(() -> System.out.println("Task running"), 0, 5, TimeUnit.SECONDS);
+        t.interrupt();
 
     }
 
