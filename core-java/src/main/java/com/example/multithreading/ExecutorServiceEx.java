@@ -41,7 +41,7 @@ public class ExecutorServiceEx {
     System.out.println("========Running cached thread executor========");
     executorService = Executors.newCachedThreadPool();
     print(submitWork(executorService));
-    executorService.shutdownNow()
+    executorService.shutdownNow();
 
     // Note: BlockingQueue is super class of LinkedBlockingQueue and SynchronousQueue
   }
