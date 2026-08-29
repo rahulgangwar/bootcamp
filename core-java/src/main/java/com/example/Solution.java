@@ -8,14 +8,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Solution {
     public static void main(String[] args) throws Exception {
-        Thread t = new Thread(() -> {
-            System.out.println("Running");
-        });
-
-        t.start();
-        t.start();   // Exception
-
-        t.interrupt();
 
     }
 
@@ -26,16 +18,12 @@ public class Solution {
         return table.length;
     }
 
-
-    public interface A<T extends Object>{
+    public interface A<T extends Object> {
         public void fun(T x);
     }
 
-    public static class B implements A<Integer>{
+    public static class B implements A<Integer> {
         @Override
-        public void fun(Integer x) {
-
-        }
+        public void fun(Integer x) {}
     }
 }
-

@@ -26,32 +26,32 @@ public class HashMapExample {
   }
 
   private void sortByKey(Map<String, Integer> budget) {
-    Map<String, Integer> sortedByKey =
-        budget.entrySet().stream()
-            /*
-             * Map's inner interface entry have default method comparingByValue which returns the
-             * comparator to do so
-             */
-            .sorted(Map.Entry.comparingByKey())
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
-
-    System.out.println("map after sorting by key: " + sortedByKey);
+//    Map<String, Integer> sortedByKey =
+//        budget.entrySet().stream()
+//            /*
+//             * Map's inner interface entry have default method comparingByValue which returns the
+//             * comparator to do so
+//             */
+//            .sorted(Map.Entry.comparingByKey())
+//            .collect(
+//                Collectors.toMap(
+//                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMapExample::new));
+//
+//    System.out.println("map after sorting by key: " + sortedByKey);
   }
 
   private void sortByValue(Map<String, Integer> budget) {
-    Map<String, Integer> sortedByValue =
-        budget.entrySet().stream()
-            /*
-             * Collections.reverseOrder reversed the comparator
-             */
-            .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-            .collect(
-                Collectors.toMap(
-                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMap::new));
+//    Map<String, Integer> sortedByValue =
+//        budget.entrySet().stream()
+//            /*
+//             * Collections.reverseOrder reversed the comparator
+//             */
+//            .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+//            .collect(
+//                Collectors.toMap(
+//                    Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e2, LinkedHashMapExample::new));
 
-    System.out.println("map after sorting by value: " + sortedByValue);
+//    System.out.println("map after sorting by value: " + sortedByValue);
   }
 
   private void synchronizedMaps() {

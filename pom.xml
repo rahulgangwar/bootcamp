@@ -3,9 +3,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.example</groupId>
-    <artifactId>java-dsa</artifactId>
+    <artifactId>bootcamp</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>java-dsa</name>
+    <name>bootcamp</name>
     <description>Demo project for Java and DSA</description>
 
     <modules>
@@ -13,21 +13,27 @@
         <module>dsa</module>
         <module>lld</module>
         <module>poc</module>
+        <module>zookeeper</module>
     </modules>
 
     <packaging>pom</packaging>
 
     <properties>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <orika.version>1.5.2</orika.version>
         <spring-cloud.version>2021.0.6</spring-cloud.version>
         <open-api.version>1.6.4</open-api.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <lombok.version>1.18.42</lombok.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

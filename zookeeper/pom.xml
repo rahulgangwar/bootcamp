@@ -9,9 +9,17 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lld</artifactId>
+    <artifactId>zookeeper</artifactId>
 
     <properties>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.9.4</version>
+        </dependency>
+    </dependencies>
 
 </project>
