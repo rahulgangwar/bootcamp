@@ -274,7 +274,16 @@ We will study `__consumer_offsets` when learning consumer offsets and commits.
 
 ---
 
-### 13. Inspect the KRaft Metadata Quorum
+### 13. Delete a Topic
+
+Example:
+
+```bash
+./kafka-topics.sh --delete   --topic payment-events   --bootstrap-server localhost:9092
+```
+
+
+### 14. Inspect the KRaft Metadata Quorum
 
 The Kafka 4.x image uses KRaft.
 
@@ -300,15 +309,6 @@ HighWatermark
 CurrentVoters
 CurrentObservers
 ```
-
-### 14. Delete a Topic
-
-Example:
-
-```bash
-./kafka-topics.sh --delete   --topic payment-events   --bootstrap-server localhost:9092
-```
-
 
 # CLI Summary
 

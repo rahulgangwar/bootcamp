@@ -1,30 +1,46 @@
 package com.example.kafka;
 
-import org.apache.kafka.clients.producer.*;
-import org.apache.kafka.common.serialization.StringSerializer;
+import com.example.Constants;
+import com.example.KafkaUtil;
 
-import java.util.Properties;
+import org.apache.kafka.clients.producer.*;
 
 public class Producer {
 
+    private static KafkaProducer<String, String> producer =
+            KafkaUtil.getProducer(Constants.BOOTSTRAP_SERVER_9092);
+    private static String[] events = {
+        "ORDER_CREATED",
+        "PAYMENT_INITIATED",
+        "PAYMENT_COMPLETED",
+        "ORDER_CONFIRMED",
+        "ORDER_SHIPPED"
+    };
+
     public static void main(String[] args) {
+        producer = KafkaUtil.getProducer(Constants.BOOTSTRAP_SERVER_9092);
 
-        Properties properties = new Properties();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.put(
-                ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.put(
-                ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+        try {
+            while (true) {
+                String orderId = "order-" + System.currentTimeMillis();
+                publishEvent(orderId, events);
 
-        KafkaProducer<String, String> producer = new KafkaProducer<>(properties);
+                // Optional: slow down production
+                Thread.sleep(1000);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            producer.flush();
+            producer.close();
+            System.out.println("Producer stopped.");
+        }
+    }
 
-        for (int i = 1; i <= 10; i++) {
-
-            String orderId = "order-" + i;
-            String event = "OrderCreated";
-
+    private static void publishEvent(String orderId, String[] events) {
+        for (String event : events) {
             ProducerRecord<String, String> record =
-                    new ProducerRecord<>("order-events", orderId, event);
+                    new ProducerRecord<>(Constants.TOPIC_ORDER_EVENTS, orderId, event);
 
             producer.send(
                     record,
@@ -34,17 +50,13 @@ public class Producer {
                             return;
                         }
 
-                        System.out.println(
-                                "Order="
-                                        + record.key()
-                                        + " | Partition="
-                                        + metadata.partition()
-                                        + " | Offset="
-                                        + metadata.offset());
+                        System.out.printf(
+                                "Published | Order=%s | Event=%s | Partition=%d | Offset=%d%n",
+                                record.key(),
+                                record.value(),
+                                metadata.partition(),
+                                metadata.offset());
                     });
         }
-
-        producer.flush();
-        producer.close();
     }
 }
