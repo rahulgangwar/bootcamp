@@ -1,4 +1,4 @@
-package com.example.kafka;
+package com.example.kafka.single_broker;
 
 import com.example.Constants;
 import com.example.KafkaUtil;

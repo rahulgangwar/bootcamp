@@ -62,7 +62,7 @@ Isr: 1
 ### 3. Create a Topic
 
 ```bash
-./kafka-topics.sh --create   --topic payment-events   --bootstrap-server localhost:9092   --partitions 5   --replication-factor 1
+./kafka-topics.sh --create   --topic order-events   --bootstrap-server localhost:9092   --partitions 5   --replication-factor 1
 ```
 
 
@@ -200,7 +200,7 @@ you should eventually see:
 order-service
 ```
 
-### 11. Describe a Consumer Group ⭐⭐⭐
+### 11. Describe a Consumer Group 
 
 ```bash
 ./kafka-consumer-groups.sh   --bootstrap-server localhost:9092   --describe   --group order-service
@@ -279,7 +279,7 @@ We will study `__consumer_offsets` when learning consumer offsets and commits.
 Example:
 
 ```bash
-./kafka-topics.sh --delete   --topic payment-events   --bootstrap-server localhost:9092
+./kafka-topics.sh --delete   --topic order-events   --bootstrap-server localhost:9092
 ```
 
 
