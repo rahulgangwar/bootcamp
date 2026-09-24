@@ -16,6 +16,7 @@
         <module>zookeeper</module>
         <module>kafka</module>
         <module>redis</module>
+        <module>elk</module>
     </modules>
 
     <packaging>pom</packaging>
