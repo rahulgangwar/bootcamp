@@ -1,7 +1,8 @@
 package com.example.security;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import com.example.security.jwt.JwtAuthenticationEntryPoint;
+import com.example.security.jwt.JwtAuthenticationFilter;
+import com.example.service.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,28 +22,30 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.example.service.UserDetailsServiceImpl;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Arrays;
-import java.util.List;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final SecurityProperties securityProperties;
 
-    @Autowired private JwtAuthenticationFilter jwtAuthenticationFilter;
+    public SecurityConfig(
+            JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            UserDetailsServiceImpl userDetailsService,
+            SecurityProperties securityProperties) {
 
-    @Autowired private UserDetailsServiceImpl userDetailsService;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.userDetailsService = userDetailsService;
+        this.securityProperties = securityProperties;
+    }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(
-            HttpSecurity http, @Value("${security.enabled:true}") boolean securityEnabled)
-            throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -54,38 +57,22 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests(
                 auth -> {
-                    if (!securityEnabled) {
+                    if (!securityProperties.isEnabled()) {
 
-                        // Local development: everything is public
+                        // Security disabled - everything is public
                         auth.anyRequest().permitAll();
 
                     } else {
 
-                        // Normal security configuration
-                        auth.requestMatchers("/home")
-                                .permitAll()
-                                .requestMatchers("/page/**")
-                                .permitAll()
-                                .requestMatchers("/auth/**")
-                                .permitAll()
-                                .requestMatchers("/api/auth/**")
-                                .permitAll()
-                                .requestMatchers("/error")
-                                .permitAll()
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html",
-                                        "/v3/api-docs/**",
-                                        "/api-docs/**",
-                                        "/swagger-resources/**",
-                                        "/webjars/**")
-                                .permitAll()
-                                .requestMatchers("/actuator/health")
-                                .permitAll()
+                        // Public endpoints configured in application.yml
+                        auth.requestMatchers(
+                                        securityProperties
+                                                .getPublicEndpoints()
+                                                .toArray(new String[0]))
+                                .permitAll();
 
-                                // MUST be last
-                                .anyRequest()
-                                .authenticated();
+                        // Everything else requires authentication
+                        auth.anyRequest().authenticated();
                     }
                 });
 
@@ -99,14 +86,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(
-                Arrays.asList(
-                        "http://localhost:3000",
-                        "http://localhost:4200")); // Add your frontend URLs
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(List.of("Authorization"));
+        SecurityProperties.Cors cors = securityProperties.getCors();
+        configuration.setAllowedOrigins(cors.getAllowedOrigins());
+        configuration.setAllowedMethods(cors.getAllowedMethods());
+        configuration.setAllowedHeaders(cors.getAllowedHeaders());
+        configuration.setAllowCredentials(cors.isAllowCredentials());
+        configuration.setExposedHeaders(cors.getExposedHeaders());
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -115,6 +100,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
+
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
