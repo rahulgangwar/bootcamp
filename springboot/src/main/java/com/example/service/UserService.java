@@ -1,7 +1,7 @@
 package com.example.service;
 
 import com.example.dto.UserDto;
-import com.example.model.User;
+import com.example.entity.User;
 import com.example.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
