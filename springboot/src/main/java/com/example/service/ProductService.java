@@ -1,10 +1,13 @@
 package com.example.service;
 
 import com.example.entity.Product;
+import com.example.kafka.event.ProductEvent;
+import com.example.kafka.event.producer.ProductEventProducer;
 import com.example.repository.ProductRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.concurrent.TimeUnit;
 
 @Log4j2
@@ -12,19 +15,22 @@ import java.util.concurrent.TimeUnit;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final RedisCacheService cacheService;
+    private final RedisCacheService redis;
+    private final ProductEventProducer eventProducer;
 
-    public ProductService(ProductRepository productRepository, RedisCacheService cacheService) {
+    public ProductService(
+            ProductRepository productRepository,
+            RedisCacheService redis,
+            ProductEventProducer eventProducer) {
         this.productRepository = productRepository;
-        this.cacheService = cacheService;
+        this.redis = redis;
+        this.eventProducer = eventProducer;
     }
 
     public Product getProduct(Long id) {
-        String key = "product:" + id;
         // Check Redis cache first
-        Product cached = cacheService.get(key, Product.class);
+        Product cached = redis.get(getCacheKey(id), Product.class);
         if (cached != null) {
-            log.info("Cache hit for product id: {}", id);
             return cached;
         }
 
@@ -32,7 +38,25 @@ public class ProductService {
         Product product = productRepository.findById(id).orElseThrow();
 
         // Update Redis cache
-        cacheService.set(key, product, 10, TimeUnit.MINUTES);
+        redis.set(getCacheKey(id), product, 10, TimeUnit.MINUTES);
         return product;
+    }
+
+    public Product updateProduct(Long id, String name, BigDecimal price) {
+        Product product = productRepository.findById(id).orElseThrow();
+        product.setName(name);
+        product.setPrice(price);
+
+        Product updated = productRepository.save(product);
+        ProductEvent event =
+                new ProductEvent(
+                        "PRODUCT_UPDATED", updated.getId(), updated.getName(), updated.getPrice());
+        eventProducer.publish(event);
+        redis.delete(getCacheKey(id));
+        return updated;
+    }
+
+    private String getCacheKey(Long productId) {
+        return "product:" + productId;
     }
 }

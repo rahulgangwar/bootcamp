@@ -1,9 +1,12 @@
 package com.example.service;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.TimeUnit;
+
+@Log4j2
 @Service
 public class RedisCacheService {
 
@@ -37,6 +40,7 @@ public class RedisCacheService {
             return null;
         }
 
+        log.info("Redis cache hit for key: {}", key);
         return type.cast(value);
     }
 
