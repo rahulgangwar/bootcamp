@@ -47,4 +47,8 @@ public class RedisCacheService {
     public void delete(String key) {
         redisTemplate.delete(key);
     }
+
+    public Long increment(String key) {
+        return redisTemplate.opsForValue().increment(key);
+    }
 }
