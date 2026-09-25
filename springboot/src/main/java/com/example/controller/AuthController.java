@@ -22,6 +22,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 
+
+/**
+ * Controller for handling authentication-related operations
+ * such as registration, login, token refresh, and email verification.
+ */
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")

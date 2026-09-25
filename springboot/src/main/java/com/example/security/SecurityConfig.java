@@ -1,5 +1,7 @@
 package com.example.security;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,54 +33,65 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    @Autowired private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    @Autowired private UserDetailsServiceImpl userDetailsService;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(AbstractHttpConfigurer::disable)
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint(jwtAuthenticationEntryPoint)
-            )
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
-                .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - Authentication
-                        .requestMatchers("/home").permitAll()
-                        .requestMatchers("/page/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http, @Value("${security.enabled:true}") boolean securityEnabled)
+            throws Exception {
 
-                        // Public endpoints - Error handling
-                        .requestMatchers("/error").permitAll()
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .exceptionHandling(
+                        exception ->
+                                exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-                        // Public endpoints - Swagger UI and API documentation
-                        .requestMatchers(
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/api-docs/**",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
+        http.authorizeHttpRequests(
+                auth -> {
+                    if (!securityEnabled) {
 
-                        // Public endpoints - Actuator (health checks)
-                        .requestMatchers("/actuator/health").permitAll()
+                        // Local development: everything is public
+                        auth.anyRequest().permitAll();
 
-                        // All other endpoints require authentication
-                        .anyRequest().authenticated()
-                )
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                    } else {
+
+                        // Normal security configuration
+                        auth.requestMatchers("/home")
+                                .permitAll()
+                                .requestMatchers("/page/**")
+                                .permitAll()
+                                .requestMatchers("/auth/**")
+                                .permitAll()
+                                .requestMatchers("/api/auth/**")
+                                .permitAll()
+                                .requestMatchers("/error")
+                                .permitAll()
+                                .requestMatchers(
+                                        "/swagger-ui/**",
+                                        "/swagger-ui.html",
+                                        "/v3/api-docs/**",
+                                        "/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/webjars/**")
+                                .permitAll()
+                                .requestMatchers("/actuator/health")
+                                .permitAll()
+
+                                // MUST be last
+                                .anyRequest()
+                                .authenticated();
+                    }
+                });
+
+        http.authenticationProvider(authenticationProvider())
+                .addFilterBefore(
+                        jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -86,12 +99,15 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:4200")); // Add your frontend URLs
+        configuration.setAllowedOrigins(
+                Arrays.asList(
+                        "http://localhost:3000",
+                        "http://localhost:4200")); // Add your frontend URLs
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(List.of("Authorization"));
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -106,7 +122,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
         return config.getAuthenticationManager();
     }
 
