@@ -5,6 +5,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.zookeeper.KeeperException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -27,13 +28,20 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         String ipAddress = getClientIp(request);
 
-        boolean allowed = rateLimiterService.allowRequest(ipAddress);
-        if (!allowed) {
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            response.getWriter().write("Too many requests");
-            return;
+        boolean allowed = false;
+        try {
+            allowed = rateLimiterService.allowRequest(ipAddress);
+            if (!allowed) {
+                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                response.getWriter().write("Too many requests");
+                return;
+            }
+            filterChain.doFilter(request, response);
+        } catch (InterruptedException e) {
+            // do nothing for now
+        } catch (KeeperException e) {
+            // do nothing for now
         }
-        filterChain.doFilter(request, response);
     }
 
     private String getClientIp(HttpServletRequest request) {
