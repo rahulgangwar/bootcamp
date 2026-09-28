@@ -145,3 +145,7 @@ security:
     allow-credentials: true
     exposed-headers:
       - Authorization
+
+aws:
+  s3:
+    bucket-name: rahul-file-updload-poc

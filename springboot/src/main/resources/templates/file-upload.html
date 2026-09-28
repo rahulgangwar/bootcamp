@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>My Drive</title>
+
+    <link rel="stylesheet"
+          href="/css/file-upload.css">
+
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- =========================================
+         Sidebar
+         ========================================= -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                ☁
+            </div>
+
+            My Drive
+
+        </div>
+
+
+        <div class="nav-item active">
+
+            <span>📁</span>
+
+            My Drive
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <span>⭐</span>
+
+            Starred
+
+        </div>
+
+
+        <div class="nav-item">
+
+            <span>🗑</span>
+
+            Trash
+
+        </div>
+
+
+        <div class="sidebar-bottom">
+
+            <strong>Storage</strong>
+
+            <br>
+
+            <span>
+                Your files are securely stored in Amazon S3.
+            </span>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =========================================
+         Main Content
+         ========================================= -->
+
+    <main class="main">
+
+        <!-- Header -->
+
+        <div class="top-bar">
+
+            <div>
+
+                <h1 class="page-title">
+                    My Drive
+                </h1>
+
+                <div class="page-subtitle">
+                    Store and manage your files securely.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================
+             Upload Card
+             ===================================== -->
+
+        <section class="upload-card">
+
+            <div class="upload-header">
+
+                <div class="upload-icon">
+                    ↑
+                </div>
+
+                <div>
+
+                    <h2 class="upload-title">
+                        Upload a file
+                    </h2>
+
+                    <p class="upload-description">
+                        Large files are uploaded securely
+                        using multipart uploads.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="upload-area">
+
+                <div class="upload-area-icon">
+                    📤
+                </div>
+
+                <div class="upload-text">
+                    Select a file to upload
+                </div>
+
+                <div class="upload-hint">
+                    Your file will be uploaded directly
+                    to cloud storage.
+                </div>
+
+
+                <input
+                        type="file"
+                        id="file"
+                >
+
+
+                <br>
+
+
+                <button
+                        class="upload-button"
+                        onclick="uploadFile()"
+                >
+                    Upload File
+                </button>
+
+
+                <div id="progress"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             Files Section
+             ===================================== -->
+
+        <section class="files-card">
+
+            <div class="files-header">
+
+                <h2 class="files-title">
+                    Your Files
+                </h2>
+
+                <span class="files-count">
+                    Stored files
+                </span>
+
+            </div>
+
+
+            <table>
+
+                <thead>
+
+                <tr>
+
+                    <th>
+                        File Name
+                    </th>
+
+                    <th>
+                        Size
+                    </th>
+
+                    <th>
+                        Actions
+                    </th>
+
+                </tr>
+
+                </thead>
+
+
+                <tbody id="fileList">
+
+                </tbody>
+
+            </table>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script src="/js/file-upload.js"></script>
+
+</body>
+
+</html>
