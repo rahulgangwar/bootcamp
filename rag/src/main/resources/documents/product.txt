@@ -1,0 +1,27 @@
+Product Reservation System
+
+Products can be reserved by customers for a maximum period of
+15 minutes.
+
+When a product is reserved, the inventory quantity is temporarily
+held for that customer.
+
+Other customers cannot purchase the reserved quantity during the
+reservation period.
+
+If the customer completes the payment within 15 minutes, the
+reservation is converted into an order.
+
+If payment is not completed within 15 minutes, the reservation
+expires and the inventory becomes available again.
+
+A customer can reserve multiple products, but each reservation
+must have a unique reservation ID.
+
+The reservation service uses Redis to maintain temporary
+reservation information.
+
+The product database uses PostgreSQL as the primary persistent
+database.
+
+Kafka is used to publish reservation events to downstream services.
