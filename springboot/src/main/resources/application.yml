@@ -149,3 +149,9 @@ security:
 aws:
   s3:
     bucket-name: rahul-file-updload-poc
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
