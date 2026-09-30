@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc";
+
+// Service Interface
+service ProductService {
+  rpc GetProduct(GetProductRequest) returns (Product);
+}
+
+// Request
+message GetProductRequest {
+  int64 id = 1;
+}
+
+// Response
+message Product {
+  int64 id = 1;
+  string name = 2;
+  string price = 3;
+}
