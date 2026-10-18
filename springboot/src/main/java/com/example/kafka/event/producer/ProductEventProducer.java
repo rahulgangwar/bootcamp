@@ -1,24 +1,32 @@
 package com.example.kafka.event.producer;
 
-import com.example.kafka.event.ProductEvent;
-import lombok.extern.log4j.Log4j2;
+import com.example.dto.product.ProductCreatedEvent;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-@Log4j2
 @Service
 public class ProductEventProducer {
 
     private static final String TOPIC = "product-events";
 
-    private final KafkaTemplate<String, ProductEvent> kafkaTemplate;
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
 
-    public ProductEventProducer(KafkaTemplate<String, ProductEvent> kafkaTemplate) {
+    public ProductEventProducer(
+            KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
         this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
     }
 
-    public void publish(ProductEvent event) {
-        log.info("Publishing Kafka Event: {}", event);
-        kafkaTemplate.send(TOPIC, event.productId().toString(), event);
+    public void publish(ProductCreatedEvent event) {
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+
+            kafkaTemplate.send(TOPIC, event.productId().toString(), payload);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize product event", e);
+        }
     }
 }

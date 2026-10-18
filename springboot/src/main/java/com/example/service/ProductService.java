@@ -59,7 +59,7 @@ public class ProductService {
     }
 
     @CacheEvict(value = "products", allEntries = true)
-    public Product updateProduct(Long id, String name, BigDecimal price) {
+    public Product updateProduct(Long id, String name, Double price) {
         Product product = productRepository.findById(id).orElseThrow();
         product.setName(name);
         product.setPrice(price);
