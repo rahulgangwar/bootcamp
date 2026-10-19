@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: myapp-replication-controller
+  labels:
+    app: myapp
+    tier: front-end
+
+spec:
+  replicas: 3
+  selector:
+    app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: nginx-myapp-container
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+

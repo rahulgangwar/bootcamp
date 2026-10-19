@@ -1,6 +1,6 @@
+### K8S Commands
 
-### Pod Cmds
-
+### Pod
 ```bash
 # Create a pod
 kubectl run nginx --image=nginx
@@ -17,8 +17,7 @@ kubectl delete pod <pod-name>
 ```
 
 
-### Cluster Cmds
-
+### Cluster
 ```bash
 # Create cluster
 kind create cluster --name k8s-lab  
@@ -27,8 +26,48 @@ kind create cluster --name k8s-lab
 kind get clusters
 ```
 
-### Deployment Cmds
+### Replication Controller
+```bash
+# Get replication controllers
+kubectl get rc
+```
 
+### ReplicaSet
+```bash
+# Get replicaset
+kubectl get replicaset
+
+# Scale replicaset
+kubectl scale --replicas=6 <type> <name>
+kubectl scale --replicas=6 replicaset myapp-replicaset
+
+# Edit replicaset config
+kubectl edit replicaset myapp-replicaset
+```
+
+### YML files
+```bash
+# Create or update resources from a YAML file
+kubectl apply -f pod.yaml
+
+# Delete resources defined in the file
+kubectl delete -f pod.yaml
+
+# Create resources from the file (fails if they already exist)
+kubectl create -f pod.yaml
+
+# Display the resources identified by the file
+kubectl get -f pod.yaml
+
+# Apply YAML files from a directory
+kubectl apply -f ./k8s/
+
+# Scale the replica set
+kubectl scale --replicas=6 -f replicaset-definition.yml
+```
+
+
+### Deployment
 ```bash
 # Deploy an application
 kubectl create deployment nginx --image=nginx
@@ -43,17 +82,20 @@ kubectl scale deployment nginx-demo --replicas=3
 
 # Delete deployment
 kubectl delete deployment nginx-demo
+
+# View the Deployment's YAML
+kubectl get deployment myapp-deployment -o yaml
+
+# View rollout status
+kubectl rollout status deployment myapp-deployment
+
+# View rollout history
+kubectl rollout history deployment myapp-deployment
+
+# Undo rollout
+kubectl rollout undo deployment myapp-deployment
+
+# Update image
+kubectl set image deployment/myapp-deployment <container-name>=nginx:1.28
 ```
-
-### Services
-```bash
-
-```
-
-### Using YML files
-
-```bash
-kubectl apply -f pod.yml
-```
-
 
