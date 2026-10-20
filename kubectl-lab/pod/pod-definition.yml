@@ -9,4 +9,4 @@ metadata:
 spec:
   containers:
     - name: nginx-demo
-      image: nginx
+      image: nginx:latest

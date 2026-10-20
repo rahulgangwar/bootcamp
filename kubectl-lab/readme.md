@@ -45,28 +45,6 @@ kubectl scale --replicas=6 replicaset myapp-replicaset
 kubectl edit replicaset myapp-replicaset
 ```
 
-### YML files
-```bash
-# Create or update resources from a YAML file
-kubectl apply -f pod.yaml
-
-# Delete resources defined in the file
-kubectl delete -f pod.yaml
-
-# Create resources from the file (fails if they already exist)
-kubectl create -f pod.yaml
-
-# Display the resources identified by the file
-kubectl get -f pod.yaml
-
-# Apply YAML files from a directory
-kubectl apply -f ./k8s/
-
-# Scale the replica set
-kubectl scale --replicas=6 -f replicaset-definition.yml
-```
-
-
 ### Deployment
 ```bash
 # Deploy an application
@@ -99,3 +77,30 @@ kubectl rollout undo deployment myapp-deployment
 kubectl set image deployment/myapp-deployment <container-name>=nginx:1.28
 ```
 
+### YML files
+```bash
+# Create or update resources from a YAML file
+kubectl apply -f pod.yaml
+
+# Delete resources defined in the file
+kubectl delete -f pod.yaml
+
+# Create resources from the file (fails if they already exist)
+kubectl create -f pod.yaml
+
+# Display the resources identified by the file
+kubectl get -f pod.yaml
+
+# Apply YAML files from a directory
+kubectl apply -f ./k8s/
+
+# Scale the replica set
+kubectl scale --replicas=6 -f replicaset-definition.yml
+```
+
+### Other helpful cmds
+```bash
+# Port forwarding
+# Forwards the requests from localhost:8080 to nodePort port: 80
+kubectl port-forward service/myapp-node-port 8080:80
+```
